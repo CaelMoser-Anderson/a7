@@ -2,11 +2,13 @@ package cs2110;
 
 import static cs2110.ExpressionParser.ADDITION;
 import static cs2110.ExpressionParser.MULTIPLICATION;
+import static cs2110.ExpressionParser.NEGATION;
 import static cs2110.ExpressionParser.SUBTRACTION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import cs2110.ast.BinaryOperation;
+import cs2110.ast.UnaryOperation;
 import cs2110.ast.Constant;
 import cs2110.ast.Expression;
 import cs2110.ast.Variable;
@@ -40,6 +42,13 @@ public class ParserTest {
      */
     public Expression multExpr(Expression left, Expression right) {
         return new BinaryOperation(left, right, '*', MULTIPLICATION);
+    }
+
+    /**
+     * Helper method to return a UnaryOperation representing the negation of the operand.
+     */
+    public Expression negExpr(Expression center) {
+        return new UnaryOperation(center, '-', NEGATION);
     }
 
     @DisplayName("WHEN an expression consists of a just a single-digit, THEN it is parsed "
@@ -215,6 +224,25 @@ public class ParserTest {
         expected = subExpr(new Variable('u'), new Constant(2));
         actual = ExpressionParser.parse("u - 2");
         assertEquals(expected, actual);
+    }
+
+    @DisplayName(
+            "We test negation and should get successful expressions")
+    @Test
+    void testNegation() throws MalformedExpression {
+        Expression expected = negExpr(new Constant(3));
+        Expression actual = ExpressionParser.parse("-3");
+        assertEquals(expected, actual);
+        expected = negExpr(subExpr(new Constant(3), new Constant(2)));
+        actual = ExpressionParser.parse("-(3 - 2)");
+        assertEquals(expected, actual);
+        expected = multExpr(new Variable('u'), negExpr(new Constant(2)));
+        actual = ExpressionParser.parse("u * (-2)");
+        assertEquals(expected, actual);
+        expected = multExpr(new Constant(2), negExpr(new Constant(3)));
+        actual = ExpressionParser.parse("2 * -3");
+        assertEquals(expected, actual);
 
     }
+
 }

@@ -52,7 +52,6 @@ public class ExpressionParser {
         Stack<Character> operators = new LinkedStack<>(); // invariant: contains only '(', '+', and '*'
         boolean expectingOperator = false; // in infix notation, the first operand comes before an operator
         String digits = "";
-        char previous = '!';
 
         for (char c : expr.toCharArray()) {
             if (!digits.isEmpty()) {
@@ -93,14 +92,9 @@ public class ExpressionParser {
                 operators.push('+');
                 expectingOperator = false;
             } else if (c == '-') {
-                if (previous == '!' || previous == '(') {
-                    Expression o2 = operands.pop(); // right operand is higher on stack
-                    Function<Integer, Integer> operation = NEGATION;
+                if (!expectingOperator) {
+                    operators.push('_'); //symbol for negation on the stack
                 } else {
-                    if (!expectingOperator) {
-                        throw new MalformedExpression(
-                                "We expected an operand and got '-' instead.");
-                    }
                     // process earlier multiplications because of higher precedence and
                     // earlier additions because of left associativity
                     while (!operators.isEmpty() && (operators.peek() == '*'
@@ -108,8 +102,8 @@ public class ExpressionParser {
                         oneStepSimplify(operands, operators);
                     }
                     operators.push('-');
-                    expectingOperator = false;
                 }
+                expectingOperator = false;
             } else if (c == ')') {
                 if (!expectingOperator) {
                     throw new MalformedExpression("We expected an operand and got ')' instead.");
@@ -151,7 +145,6 @@ public class ExpressionParser {
                     }
                 }
             }
-            previous = c;
         }
         if (!digits.isEmpty()) {
             operands.push(new Constant(Integer.parseInt(digits)));
@@ -205,20 +198,24 @@ public class ExpressionParser {
     private static void oneStepSimplify(Stack<Expression> operands, Stack<Character> operators)
             throws MalformedExpression {
         char c = operators.pop();
-        //assert c == '+' || c == '*';
-        if (!(c == '+' || c == '*' || c == '-')) {
-            throw new MalformedExpression(
-                    "The operator stack does not have a proper binary operator");
+        if (c == '_') {
+            Expression o2 = operands.pop();
+            operands.push(new UnaryOperation(o2, '-', NEGATION));
+        } else {
+            if (!(c == '+' || c == '*' || c == '-')) {
+                throw new MalformedExpression(
+                        "The operator stack does not have a proper binary or unary operator");
+            }
+            Expression o2 = operands.pop(); // right operand is higher on stack
+            Expression o1 = operands.pop();
+            BiFunction<Integer, Integer, Integer> operation = ADDITION;
+            if (c == '*') {
+                operation = MULTIPLICATION;
+            } else if (c == '-') {
+                operation = SUBTRACTION;
+            }
+            operands.push(new BinaryOperation(o1, o2, c, operation));
         }
-        Expression o2 = operands.pop(); // right operand is higher on stack
-        Expression o1 = operands.pop();
-        BiFunction<Integer, Integer, Integer> operation = ADDITION;
-        if (c == '*') {
-            operation = MULTIPLICATION;
-        } else if (c == '-') {
-            operation = SUBTRACTION;
-        }
-        operands.push(new BinaryOperation(o1, o2, c, operation));
     }
 
     /**
