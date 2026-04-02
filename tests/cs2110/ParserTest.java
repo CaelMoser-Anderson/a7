@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import cs2110.ast.BinaryOperation;
 import cs2110.ast.Constant;
 import cs2110.ast.Expression;
+import cs2110.ast.Variable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -24,8 +25,8 @@ public class ParserTest {
     }
 
     /**
-     *  Helper method to return a BinaryOperation representing the multiplication of the given
-     *  `left` and `right` operands.
+     * Helper method to return a BinaryOperation representing the multiplication of the given `left`
+     * and `right` operands.
      */
     public Expression multExpr(Expression left, Expression right) {
         return new BinaryOperation(left, right, '*', MULTIPLICATION);
@@ -94,4 +95,24 @@ public class ParserTest {
      *  and provide full coverage of the features that you added (exception handling,
      *  variables, multi-digit constants, whitespace handling, subtraction, and negation).
      */
+    @DisplayName("WHEN we parse the expression \"252*(7+41)\", THEN the addition BinaryOperation "
+            + "appears the right operand of the multiplication BinaryOperation.")
+    @Test
+    void testMultipleDigits() throws MalformedExpression {
+        Expression expected = multExpr(new Constant(252),
+                addExpr(new Constant(7), new Constant(41)));
+        Expression actual = ExpressionParser.parse("252*(7+41)");
+        assertEquals(expected, actual);
+    }
+
+    @DisplayName("WHEN we parse the expression \"a*(b+21)\", THEN the addition BinaryOperation "
+            + "appears the right operand of the multiplication BinaryOperation.")
+    @Test
+    void testVariableUsage() throws MalformedExpression {
+        Expression expected = multExpr(new Variable('a'),
+                addExpr(new Variable('b'), new Constant(21)));
+        Expression actual = ExpressionParser.parse("a*(b+21)");
+        assertEquals(expected, actual);
+    }
+
 }
