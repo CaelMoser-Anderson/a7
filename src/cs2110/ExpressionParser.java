@@ -3,6 +3,7 @@ package cs2110;
 import cs2110.ast.Constant;
 import cs2110.ast.Expression;
 import cs2110.ast.BinaryOperation;
+import cs2110.ast.UnaryOperation;
 import cs2110.ast.Variable;
 import cs2110.lib.LinkedStack;
 import cs2110.lib.Stack;
@@ -51,10 +52,11 @@ public class ExpressionParser {
         Stack<Character> operators = new LinkedStack<>(); // invariant: contains only '(', '+', and '*'
         boolean expectingOperator = false; // in infix notation, the first operand comes before an operator
         String digits = "";
+        char previous = '!';
 
         for (char c : expr.toCharArray()) {
             if (!digits.isEmpty()) {
-                if (isDigit(c)) {
+                if (Character.isDigit(c)) {
                     digits = digits + c;
                 } else {
                     operands.push(new Constant(
@@ -85,11 +87,29 @@ public class ExpressionParser {
                 // process earlier multiplications because of higher precedence and
                 // earlier additions because of left associativity
                 while (!operators.isEmpty() && (operators.peek() == '*'
-                        || operators.peek() == '+')) {
+                        || operators.peek() == '+' || operators.peek() == '-')) {
                     oneStepSimplify(operands, operators);
                 }
                 operators.push('+');
                 expectingOperator = false;
+            } else if (c == '-') {
+                if (previous == '!' || previous == '(') {
+                    Expression o2 = operands.pop(); // right operand is higher on stack
+                    Function<Integer, Integer> operation = NEGATION;
+                } else {
+                    if (!expectingOperator) {
+                        throw new MalformedExpression(
+                                "We expected an operand and got '-' instead.");
+                    }
+                    // process earlier multiplications because of higher precedence and
+                    // earlier additions because of left associativity
+                    while (!operators.isEmpty() && (operators.peek() == '*'
+                            || operators.peek() == '+' || operators.peek() == '-')) {
+                        oneStepSimplify(operands, operators);
+                    }
+                    operators.push('-');
+                    expectingOperator = false;
+                }
             } else if (c == ')') {
                 if (!expectingOperator) {
                     throw new MalformedExpression("We expected an operand and got ')' instead.");
@@ -110,7 +130,7 @@ public class ExpressionParser {
             } else if (isVariable(c)) {
                 operands.push(new Variable(c));
                 expectingOperator = true;
-            } else if (isDigit(c) && digits.isEmpty()) { // c is a digit
+            } else if (Character.isDigit(c) && digits.isEmpty()) { // c is a digit
                 if (c < '0' || c > '9') {
                     throw new MalformedExpression(
                             "We expected a digit between 0 and 9.");
@@ -123,13 +143,15 @@ public class ExpressionParser {
                 //operands.push(new Constant(c - '0'));
                 //expectingOperator = true;
             } else {
-                if (c != ' ' && digits.isEmpty()) {
-                    throw new MalformedExpression(
-                            "Invalid Character"); //In theory, by the time we're here we've checked
-                    // everything
+                if (c != ' ') {
+                    if (digits.isEmpty()) {
+                        throw new MalformedExpression(
+                                "Invalid Character"); //In theory, by the time we're here we've checked
+                        // everything
+                    }
                 }
-
             }
+            previous = c;
         }
         if (!digits.isEmpty()) {
             operands.push(new Constant(Integer.parseInt(digits)));
@@ -169,27 +191,9 @@ public class ExpressionParser {
      * returns false.
      */
     private static boolean isVariable(char c) {
-        String variable = "abcdefghijklmnopqrstuvwxyz";
-        for (char b : variable.toCharArray()) {
-            if (b == c) {
-                return true;
-            }
-        }
-        return false;
+        return c >= 'a' && c <= 'z';
     }
 
-    /**
-     * Returns true if c is a digit. Otherwise, returns false.
-     */
-    private static boolean isDigit(char c) {
-        String variable = "0123456789";
-        for (char b : variable.toCharArray()) {
-            if (b == c) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * Helper method that partially simplifies the expression by `pop()`ping one operator from the
@@ -202,13 +206,19 @@ public class ExpressionParser {
             throws MalformedExpression {
         char c = operators.pop();
         //assert c == '+' || c == '*';
-        if (!(c == '+' || c == '*')) {
+        if (!(c == '+' || c == '*' || c == '-')) {
             throw new MalformedExpression(
                     "The operator stack does not have a proper binary operator");
         }
         Expression o2 = operands.pop(); // right operand is higher on stack
         Expression o1 = operands.pop();
-        operands.push(new BinaryOperation(o1, o2, c, c == '+' ? ADDITION : MULTIPLICATION));
+        BiFunction<Integer, Integer, Integer> operation = ADDITION;
+        if (c == '*') {
+            operation = MULTIPLICATION;
+        } else if (c == '-') {
+            operation = SUBTRACTION;
+        }
+        operands.push(new BinaryOperation(o1, o2, c, operation));
     }
 
     /**
@@ -228,7 +238,7 @@ public class ExpressionParser {
                 try {
                     System.out.println("= " + System.lineSeparator() + parse(expr).treeString());
                 } catch (MalformedExpression e) {
-
+                    System.out.println("Error: " + e.getMessage());
                 }
             }
         }

@@ -2,7 +2,9 @@ package cs2110;
 
 import static cs2110.ExpressionParser.ADDITION;
 import static cs2110.ExpressionParser.MULTIPLICATION;
+import static cs2110.ExpressionParser.SUBTRACTION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import cs2110.ast.BinaryOperation;
 import cs2110.ast.Constant;
@@ -22,6 +24,14 @@ public class ParserTest {
      */
     public Expression addExpr(Expression left, Expression right) {
         return new BinaryOperation(left, right, '+', ADDITION);
+    }
+
+    /**
+     * Helper method to return a BinaryOperation representing the subtraction of the given `left`
+     * and `right` operands.
+     */
+    public Expression subExpr(Expression left, Expression right) {
+        return new BinaryOperation(left, right, '-', SUBTRACTION);
     }
 
     /**
@@ -95,6 +105,50 @@ public class ParserTest {
      *  and provide full coverage of the features that you added (exception handling,
      *  variables, multi-digit constants, whitespace handling, subtraction, and negation).
      */
+
+    @DisplayName("Testing Empty String, we expect a MalformedExpression to be thrown")
+    @Test
+    void testEmptyString() throws MalformedExpression {
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse(""));
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse(" "));
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("   "));
+    }
+
+
+    @DisplayName("Testing Unclosed Parenthesis, we expect a MalformedExpression to be thrown")
+    @Test
+    void testUnclosedParenthesis() throws MalformedExpression {
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("(2 * 2"));
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("1+3)"));
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("1+(3)+2)"));
+    }
+
+    @DisplayName("When we have invalid characters, we expect an error message")
+    @Test
+    void testInvalidCharacters() throws MalformedExpression {
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("2 * @"));
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("1+ !"));
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("1 > 2"));
+        String variable = "!@#$%^&~`{[}]||?.,:;'QWERTYUIOPASDFGHJKLZXCVBNM";
+        for (char b : variable.toCharArray()) {
+            assertThrows(MalformedExpression.class,
+                    () -> ExpressionParser.parse(String.valueOf(b)));
+        }
+    }
+
+    @DisplayName("When we have multiple operators in a row or misplaced operators,"
+            + " we should get an exception.")
+    @Test
+    void testMultipleOperators() throws MalformedExpression {
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("a ++ 3"));
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("b +* (3)"));
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("2 * 2 +"));
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("+4"));
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("b+"));
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("2 * 2 *"));
+    }
+
+
     @DisplayName("WHEN we parse the expression \"252*(7+41)\", THEN the addition BinaryOperation "
             + "appears the right operand of the multiplication BinaryOperation.")
     @Test
@@ -115,4 +169,52 @@ public class ParserTest {
         assertEquals(expected, actual);
     }
 
+    @DisplayName("WHEN we parse the expression \"apples * 21\", THEN the addition BinaryOperation "
+            + "appears the right operand of the multiplication BinaryOperation.")
+    @Test
+    void testFalseVariableUsage() throws MalformedExpression {
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("apples * 21"));
+        assertThrows(MalformedExpression.class, () -> ExpressionParser.parse("ap + 21"));
+    }
+
+
+    @DisplayName(
+            "We parse the expression \"(a  *  b) +2)\" and should get a successful expression")
+    @Test
+    void testWhiteSpace() throws MalformedExpression {
+        Expression expected = addExpr((multExpr(new Variable('a'), new Variable('b'))),
+                new Constant(2));
+        Expression actual = ExpressionParser.parse("(a  *  b) +2");
+        assertEquals(expected, actual);
+        expected = addExpr(new Constant(3), new Constant(2));
+        actual = ExpressionParser.parse("3 + 2");
+        assertEquals(expected, actual);
+    }
+
+    @DisplayName(
+            "WHEN we parse the expression \"(a  *  b) +2 2)\" we should get a thrown exception)")
+    @Test
+    void testFaultyWhiteSpace() throws MalformedExpression {
+        assertThrows(MalformedExpression.class, () ->
+                ExpressionParser.parse("(a  *  b) +2 2)"));
+        assertThrows(MalformedExpression.class, () ->
+                ExpressionParser.parse("2 3"));
+    }
+
+    @DisplayName(
+            "We parse the expression \"(a  *  b) - 2)\" and should get a successful expression")
+    @Test
+    void testSubtraction() throws MalformedExpression {
+        Expression expected = subExpr((multExpr(new Variable('a'), new Variable('b'))),
+                new Constant(2));
+        Expression actual = ExpressionParser.parse("(a  *  b) - 2");
+        assertEquals(expected, actual);
+        expected = subExpr(new Constant(3), new Constant(2));
+        actual = ExpressionParser.parse("3 - 2");
+        assertEquals(expected, actual);
+        expected = subExpr(new Variable('u'), new Constant(2));
+        actual = ExpressionParser.parse("u - 2");
+        assertEquals(expected, actual);
+
+    }
 }
