@@ -242,6 +242,10 @@ public class ParserTest {
         expected = multExpr(new Constant(2), negExpr(new Constant(3)));
         actual = ExpressionParser.parse("2 * -3");
         assertEquals(expected, actual);
+        expected = addExpr(negExpr(new Constant(2)), (new Constant(4)));
+        actual = ExpressionParser.parse("-2 + 4");
+        assertEquals(expected, actual);
+
 
     }
 

@@ -86,7 +86,8 @@ public class ExpressionParser {
                 // process earlier multiplications because of higher precedence and
                 // earlier additions because of left associativity
                 while (!operators.isEmpty() && (operators.peek() == '*'
-                        || operators.peek() == '+' || operators.peek() == '-')) {
+                        || operators.peek() == '+' || operators.peek() == '-' || operators.peek()
+                        == '_')) {
                     oneStepSimplify(operands, operators);
                 }
                 operators.push('+');
@@ -98,7 +99,8 @@ public class ExpressionParser {
                     // process earlier multiplications because of higher precedence and
                     // earlier additions because of left associativity
                     while (!operators.isEmpty() && (operators.peek() == '*'
-                            || operators.peek() == '+' || operators.peek() == '-')) {
+                            || operators.peek() == '+' || operators.peek() == '-' ||
+                            operators.peek() == '_')) {
                         oneStepSimplify(operands, operators);
                     }
                     operators.push('-');
