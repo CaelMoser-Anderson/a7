@@ -16,25 +16,35 @@ public record Constant(int value) implements Expression {
         return String.valueOf(value);
     }
 
+    /**
+     * Returns the value of the constant.
+     */
     @Override
     public int evaluate() {
         // TODO 4.1A: Complete the definition of this method. Add a Javadoc comment to this method
         //  that refines its specifications.
-        throw new UnsupportedOperationException();
+        return value;
     }
 
+    /**
+     * Takes in a char argument variable and an Expression argument expr.
+     * Returns expr.
+     */
     @Override
     public Expression substitute(char variable, Expression expr) {
         // TODO 4.2A: Complete the definition of this method. Add a Javadoc comment to this method
         //  that refines its specifications.
-        throw new UnsupportedOperationException();
+        return new Constant(value);
     }
 
+    /**
+     * Returns an identical constant with the same value as this.
+     */
     @Override
     public Expression simplify() {
         // TODO 4.3A: Complete the definition of this method. Add a Javadoc comment to this method
         //  that refines its specifications.
-        throw new UnsupportedOperationException();
+        return new Constant(value);
     }
 
     /**

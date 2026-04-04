@@ -1,5 +1,6 @@
 package cs2110.ast;
 
+import javax.naming.ldap.UnsolicitedNotification;
 import java.util.function.BiFunction;
 
 /**
@@ -34,25 +35,46 @@ public record BinaryOperation(Expression left, Expression right, char symbol,
                 ")";
     }
 
+    /**
+     * Returns the value of the expression if it contains no variables
+     * Throws UnassignedVariable error if the expression contains a variable.
+     */
     @Override
     public int evaluate() throws UnassignedVariable {
         // TODO 4.1C: Complete the definition of this method. Add a Javadoc comment to this method
         //  that refines its specifications.
-        throw new UnsupportedOperationException();
+        return op.apply(left.evaluate(),right.evaluate());
     }
 
+    /**
+     * Takes in a char argument variable and an Expression argument expr.
+     * Returns a new binary operation with all instances of variable replaced with expr.
+     */
     @Override
     public Expression substitute(char variable, Expression expr) {
         // TODO 4.2C: Complete the definition of this method. Add a Javadoc comment to this method
         //  that refines its specifications.
-        throw new UnsupportedOperationException();
+        Expression newLeft = left.substitute(variable,expr);
+        Expression newRight = right.substitute(variable,expr);
+        return new BinaryOperation(newLeft,newRight,symbol,op);
     }
 
+    /**
+     * Returns a simplified version of the binary operation. If both children are solely made
+     * up of constants, their value is returned. If there is a variable, it returns a new unary
+     * operation with that variable and simplified children.
+     */
     @Override
     public Expression simplify() {
         // TODO 4.3C: Complete the definition of this method. Add a Javadoc comment to this method
         //  that refines its specifications.
-        throw new UnsupportedOperationException();
+        Expression simplifiedLeft = left.simplify();
+        Expression simplifiedRight = right.simplify();
+        try {
+            return new Constant(op.apply(simplifiedLeft.evaluate(),simplifiedRight.evaluate()));
+        } catch (UnassignedVariable e) {
+            return new BinaryOperation(simplifiedLeft,simplifiedRight,symbol,op);
+        }
     }
 
     @Override

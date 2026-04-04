@@ -1,5 +1,7 @@
 package cs2110.ast;
 
+import cs2110.ExpressionParser;
+
 /**
  * An expression representing a variable with a given name.
  */
@@ -22,25 +24,36 @@ public record Variable(char name) implements Expression {
        return String.valueOf(name);
     }
 
+    /**
+     * Throws UnassignedVariable error because a variable cannot be evaluated
+     */
     @Override
     public int evaluate() throws UnassignedVariable {
         // TODO 4.1B: Complete the definition of this method. Add a Javadoc comment to this method
         //  that refines its specifications.
-        throw new UnsupportedOperationException();
+        throw new UnassignedVariable();
     }
 
+    /**
+     * Takes in a char argument variable and an Expression argument expr.
+     * Returns expr
+     */
     @Override
     public Expression substitute(char variable, Expression expr) {
         // TODO 4.2B: Complete the definition of this method. Add a Javadoc comment to this method
         //  that refines its specifications.
-        throw new UnsupportedOperationException();
+        if (this.name == variable) {return expr;}
+        else {return new Variable(name);}
     }
 
+    /**
+     * Returns an identical variable to this.
+     */
     @Override
     public Expression simplify() {
         // TODO 4.3B: Complete the definition of this method. Add a Javadoc comment to this method
         //  that refines its specifications.
-        throw new UnsupportedOperationException();
+        return new Variable(name);
     }
 
     /**

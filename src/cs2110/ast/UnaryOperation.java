@@ -21,25 +21,44 @@ public record UnaryOperation(Expression arg, char symbol, Function<Integer, Inte
         return String.valueOf(symbol) + arg.infixString();
     }
 
+    /**
+     * Returns the value of the expression if it contains no variables
+     * Throws UnassignedVariable error if the expression contains a variable.
+     */
     @Override
     public int evaluate() throws UnassignedVariable {
         // TODO 4.1D: Complete the definition of this method. Add a Javadoc comment to this method
         //  that refines its specifications.
-        throw new UnsupportedOperationException();
+        return op.apply(arg.evaluate());
     }
 
+    /**
+     * Takes in a char argument variable and an Expression argument expr.
+     * Returns a new unary operation with all instances of variable replaced with expr.
+     */
     @Override
     public Expression substitute(char variable, Expression expr) {
         // TODO 4.2D: Complete the definition of this method. Add a Javadoc comment to this method
         //  that refines its specifications.
-        throw new UnsupportedOperationException();
+        Expression newArg = arg.substitute(variable,expr);
+        return new UnaryOperation(newArg,symbol,op);
     }
 
+    /**
+     * Returns a simplified version of the unary operation. If the expression's argument is made
+     * up of constants an equivalent constant is returned. If there is a variable, a new unary
+     * operation is returned with that variable.
+     */
     @Override
     public Expression simplify() {
         // TODO 4.3D: Complete the definition of this method. Add a Javadoc comment to this method
         //  that refines its specifications.
-        throw new UnsupportedOperationException();
+        Expression newArg = arg.simplify();
+        try {
+            return new UnaryOperation(new Constant(newArg.evaluate()),symbol,op);
+        } catch (UnassignedVariable e) {
+            return new UnaryOperation(arg.simplify(), symbol, op);
+        }
     }
 
     /**
