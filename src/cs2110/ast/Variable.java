@@ -21,7 +21,7 @@ public record Variable(char name) implements Expression {
      */
     @Override
     public String infixString() {
-       return String.valueOf(name);
+        return String.valueOf(name);
     }
 
     /**
@@ -29,8 +29,6 @@ public record Variable(char name) implements Expression {
      */
     @Override
     public int evaluate() throws UnassignedVariable {
-        // TODO 4.1B: Complete the definition of this method. Add a Javadoc comment to this method
-        //  that refines its specifications.
         throw new UnassignedVariable();
     }
 
@@ -40,8 +38,6 @@ public record Variable(char name) implements Expression {
      */
     @Override
     public Expression substitute(char variable, Expression expr) {
-        // TODO 4.2B: Complete the definition of this method. Add a Javadoc comment to this method
-        //  that refines its specifications.
         if (this.name == variable) {return expr;}
         else {return new Variable(name);}
     }
@@ -51,8 +47,6 @@ public record Variable(char name) implements Expression {
      */
     @Override
     public Expression simplify() {
-        // TODO 4.3B: Complete the definition of this method. Add a Javadoc comment to this method
-        //  that refines its specifications.
         return new Variable(name);
     }
 

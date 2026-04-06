@@ -41,8 +41,6 @@ public record BinaryOperation(Expression left, Expression right, char symbol,
      */
     @Override
     public int evaluate() throws UnassignedVariable {
-        // TODO 4.1C: Complete the definition of this method. Add a Javadoc comment to this method
-        //  that refines its specifications.
         return op.apply(left.evaluate(),right.evaluate());
     }
 
@@ -52,8 +50,6 @@ public record BinaryOperation(Expression left, Expression right, char symbol,
      */
     @Override
     public Expression substitute(char variable, Expression expr) {
-        // TODO 4.2C: Complete the definition of this method. Add a Javadoc comment to this method
-        //  that refines its specifications.
         Expression newLeft = left.substitute(variable,expr);
         Expression newRight = right.substitute(variable,expr);
         return new BinaryOperation(newLeft,newRight,symbol,op);
@@ -66,8 +62,6 @@ public record BinaryOperation(Expression left, Expression right, char symbol,
      */
     @Override
     public Expression simplify() {
-        // TODO 4.3C: Complete the definition of this method. Add a Javadoc comment to this method
-        //  that refines its specifications.
         Expression simplifiedLeft = left.simplify();
         Expression simplifiedRight = right.simplify();
         try {
@@ -77,11 +71,56 @@ public record BinaryOperation(Expression left, Expression right, char symbol,
         }
     }
 
+    /**
+     * Returns a mathematically equivalent expression where any addition or subtraction operations nested inside
+     * a multiplication operation get expanded so that all the direct children of all multiplication operations
+     * are constants
+     * REQUIRES: no part of the input expression can have a UnaryOperation
+     */
     @Override
     public Expression expand() {
-        // TODO 4.4: Complete the definition of this method. Add a Javadoc comment to this method
-        //  that refines its specifications.
-        throw new UnsupportedOperationException();
+        BiFunction<Integer, Integer, Integer> ADDITION = (x, y) -> x + y;
+        BiFunction<Integer, Integer, Integer> SUBTRACTION = (x, y) -> x - y;
+        if (symbol == '*') {
+            Expression leftChild = left.expand();
+            Expression rightChild = right.expand();
+            if (leftChild instanceof BinaryOperation) {
+                BinaryOperation binLeftChild = (BinaryOperation) leftChild;
+                if (binLeftChild.symbol() == '+' || binLeftChild.symbol() == '-') {
+                    Expression newLeft = new BinaryOperation(binLeftChild.left(), rightChild, '*', op);
+                    Expression newRight = new BinaryOperation(binLeftChild.right(), rightChild, '*', op);
+                    Expression finalLeft = newLeft.expand();
+                    Expression finalRight = newRight.expand();
+                    // covers addition and subtraction
+                    return new BinaryOperation(finalLeft, finalRight, binLeftChild.symbol(),binLeftChild.op());
+                }
+            }
+            if (rightChild instanceof BinaryOperation ) {
+                BinaryOperation binRightChild = (BinaryOperation) rightChild;
+                if (binRightChild.symbol() == '+' || binRightChild.symbol() == '-') {
+                    Expression newLeft = new BinaryOperation(leftChild, binRightChild.left(), '*', op);
+                    Expression newRight = new BinaryOperation(leftChild, binRightChild.right(), '*', op);
+                    Expression finalLeft = newLeft.expand();
+                    Expression finalRight = newRight.expand();
+                    return new BinaryOperation(finalLeft, finalRight, binRightChild.symbol(), binRightChild.op());
+                }
+            }
+
+
+            // when the symbol == '*' and the children are constants/variables
+            return new BinaryOperation(leftChild,rightChild,symbol,op);
+        }
+        else if (symbol == '+') {
+            Expression newLeft = left.expand();
+            Expression newRight = right.expand();
+            return new BinaryOperation(newLeft,newRight,symbol,op);
+        }
+        // symbol == '-'
+        else {
+            Expression newLeft = left.expand();
+            Expression newRight = right.expand();
+            return new BinaryOperation(newLeft,newRight,symbol,op);
+        }
     }
 
     @Override

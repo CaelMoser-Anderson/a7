@@ -16,8 +16,6 @@ public record UnaryOperation(Expression arg, char symbol, Function<Integer, Inte
      */
     @Override
     public String infixString() {
-        // TODO 2.3D: Complete the definition of this method. Add a Javadoc comment to this method
-        //  that refines its specifications.
         return String.valueOf(symbol) + arg.infixString();
     }
 
@@ -27,8 +25,6 @@ public record UnaryOperation(Expression arg, char symbol, Function<Integer, Inte
      */
     @Override
     public int evaluate() throws UnassignedVariable {
-        // TODO 4.1D: Complete the definition of this method. Add a Javadoc comment to this method
-        //  that refines its specifications.
         return op.apply(arg.evaluate());
     }
 
@@ -38,8 +34,6 @@ public record UnaryOperation(Expression arg, char symbol, Function<Integer, Inte
      */
     @Override
     public Expression substitute(char variable, Expression expr) {
-        // TODO 4.2D: Complete the definition of this method. Add a Javadoc comment to this method
-        //  that refines its specifications.
         Expression newArg = arg.substitute(variable,expr);
         return new UnaryOperation(newArg,symbol,op);
     }
@@ -51,8 +45,6 @@ public record UnaryOperation(Expression arg, char symbol, Function<Integer, Inte
      */
     @Override
     public Expression simplify() {
-        // TODO 4.3D: Complete the definition of this method. Add a Javadoc comment to this method
-        //  that refines its specifications.
         Expression newArg = arg.simplify();
         try {
             return new UnaryOperation(new Constant(newArg.evaluate()),symbol,op);
