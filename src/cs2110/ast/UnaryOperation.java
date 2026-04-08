@@ -41,7 +41,7 @@ public record UnaryOperation(Expression arg, char symbol, Function<Integer, Inte
     /**
      * Returns a simplified version of the unary operation. If the expression's argument is made
      * up of constants an equivalent constant is returned. If there is a variable, a new unary
-     * operation is returned with that variable.
+     * operation is returned with the same symbol and op and simplified() called on its arg.
      */
     @Override
     public Expression simplify() {

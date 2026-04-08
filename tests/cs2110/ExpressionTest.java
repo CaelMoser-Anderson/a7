@@ -237,9 +237,6 @@ public class ExpressionTest {
         assertEquals(Actual,testExpression.simplify());
     }
 
-
-
-
     @DisplayName("Nothing to simplify")
     @Test
     void noSimplify() throws MalformedExpression, UnassignedVariable {

@@ -57,8 +57,8 @@ public record BinaryOperation(Expression left, Expression right, char symbol,
 
     /**
      * Returns a simplified version of the binary operation. If both children are solely made
-     * up of constants, their value is returned. If there is a variable, it returns a new unary
-     * operation with that variable and simplified children.
+     * up of constants, their value is returned. If there is a variable, it returns a new binary
+     * operation with the same symbol, op, and simplify() called on each of the children.
      */
     @Override
     public Expression simplify() {
