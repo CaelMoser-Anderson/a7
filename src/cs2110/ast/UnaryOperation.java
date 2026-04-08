@@ -47,7 +47,7 @@ public record UnaryOperation(Expression arg, char symbol, Function<Integer, Inte
     public Expression simplify() {
         Expression newArg = arg.simplify();
         try {
-            return new UnaryOperation(new Constant(newArg.evaluate()),symbol,op);
+            return new Constant(op.apply(newArg.evaluate()));
         } catch (UnassignedVariable e) {
             return new UnaryOperation(arg.simplify(), symbol, op);
         }

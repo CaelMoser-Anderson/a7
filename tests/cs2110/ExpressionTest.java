@@ -28,7 +28,7 @@ public class ExpressionTest {
     @DisplayName("Evaluate Variable Base case")
     @Test
     void varEvaluate() throws MalformedExpression{
-        Expression test = ExpressionParser.parse("x + 1");
+        Expression test = ExpressionParser.parse("x+1");
         assertThrows(UnassignedVariable.class, () -> test.evaluate());
     }
 
@@ -197,7 +197,7 @@ public class ExpressionTest {
     @Test
     void UnarySimplify() throws MalformedExpression, UnassignedVariable {
         Expression testExpression = ExpressionParser.parse("-2");
-        Expression Actual = ExpressionParser.parse("-2");
+        Expression Actual = new Constant(-2);
         assertEquals(Actual,testExpression.simplify());
     }
 
@@ -224,7 +224,7 @@ public class ExpressionTest {
     @Test
     void compVarSimplify() throws MalformedExpression, UnassignedVariable {
         Expression testExpression = ExpressionParser.parse("3*(-2+x)+7*x");
-        Expression Actual = ExpressionParser.parse("3*(-2+x)+7*x");
+        Expression Actual = ExpressionParser.parse("3*(y+x)+7*x").substitute('y',new Constant(-2));
         assertEquals(Actual,testExpression.simplify());
     }
 
