@@ -155,7 +155,7 @@ public class ExpressionParser {
         // infix expressions end with an operand
         if (!expectingOperator) {
             throw new MalformedExpression(
-                    "After the loop, we expect to have expectingOperator set to true");
+                    "We don't want to end with an operator");
         }
         // finish simplifying until we have a single operand and no operators
         while (!operators.isEmpty()) {
