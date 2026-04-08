@@ -139,7 +139,7 @@ public class ExpressionParser {
                 //operands.push(new Constant(c - '0'));
                 //expectingOperator = true;
             } else {
-                if (c != ' ') {
+                if (Character.isWhitespace(c)) {
                     if (digits.isEmpty()) {
                         throw new MalformedExpression(
                                 "Invalid Character"); //In theory, by the time we're here we've checked
