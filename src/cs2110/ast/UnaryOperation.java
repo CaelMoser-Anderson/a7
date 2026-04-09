@@ -16,7 +16,7 @@ public record UnaryOperation(Expression arg, char symbol, Function<Integer, Inte
      */
     @Override
     public String infixString() {
-        return String.valueOf(symbol) + arg.infixString();
+        return symbol + arg.infixString();
     }
 
     /**

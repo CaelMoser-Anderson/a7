@@ -31,8 +31,7 @@ public record BinaryOperation(Expression left, Expression right, char symbol,
      */
     @Override
     public String infixString() {
-        return "(" + left.infixString() + " " + String.valueOf(symbol) + " " + right.infixString() +
-                ")";
+        return "(" + left.infixString() + " " + symbol + " " + right.infixString() + ")";
     }
 
     /**
