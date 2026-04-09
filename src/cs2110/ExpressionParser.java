@@ -111,7 +111,7 @@ public class ExpressionParser {
                     throw new MalformedExpression("We expected an operand and got ')' instead.");
                 }
                 if (operators.isEmpty()) {
-                    throw new MalformedExpression("We expect more operators, but there are none.");
+                    throw new MalformedExpression("We have a mistake with our parenthesis");
                 }
                 // process operators until we find the matching '(' on the operators stack
                 while (operators.peek() != '(') {
@@ -139,7 +139,7 @@ public class ExpressionParser {
                 //operands.push(new Constant(c - '0'));
                 //expectingOperator = true;
             } else {
-                if (Character.isWhitespace(c)) {
+                if (c != ' ') {
                     if (digits.isEmpty()) {
                         throw new MalformedExpression(
                                 "Invalid Character"); //In theory, by the time we're here we've checked
@@ -160,8 +160,7 @@ public class ExpressionParser {
         // finish simplifying until we have a single operand and no operators
         while (!operators.isEmpty()) {
             if (operators.peek() == '(') {
-                throw new MalformedExpression("We did not expect to find a '(' in operators after "
-                        + "our main loop");
+                throw new MalformedExpression("We have an error with our parenthesis");
             }
             oneStepSimplify(operands, operators);
         }
